@@ -1,43 +1,43 @@
 #案例分析
 该项目是采用koa框架的一个bss。主要点有3个 
 
-1.角色 
+1 角色 
 
-2.信息 
+2 信息 
 
-3.动作
+3 动作
 ## 1.角色
 在该系统中，角色一共有以下几种
 .游客---没有登陆的用户
 
-.用户---注册用户，没有多余权限
+- 用户---注册用户，没有多余权限
 
-.管理员---辅助管理员做社区内容管理
+- 管理员---辅助管理员做社区内容管理
 
-.站长---权限最高的用户
+- 站长---权限最高的用户
 
 角色的权限从低到高，高权限的用户将包含权限低的用户权限。
 
 ## 2.信息结构
 主要信息有：
-.用户 —— 模型名称 User，论坛为 UGC 产品，所有内容都围绕用户来进行；
+- 用户 —— 模型名称 User，论坛为 UGC 产品，所有内容都围绕用户来进行；
 
-.话题 —— 模型名称 Topic，LaraBBS 论坛应用的最核心数据，有时我们称为帖子；
+- 话题 —— 模型名称 Topic，LaraBBS 论坛应用的最核心数据，有时我们称为帖子；
 
-.分类 —— 模型名称 Category，话题的分类，每一个话题必须对应一个分类，分类由管理员创建；
+- 分类 —— 模型名称 Category，话题的分类，每一个话题必须对应一个分类，分类由管理员创建；
 
-.回复 —— 模型名称 Reply，针对某个话题的讨论，一个话题下可以有多个回复。
+- 回复 —— 模型名称 Reply，针对某个话题的讨论，一个话题下可以有多个回复。
 
 ## 3.动作
 角色和信息之间的互动称之为『动作』，动作主要由以下几个：
 
-.创建 Create
+- 创建 Create
 
-.查看 Read
+- 查看 Read
 
-.编辑 Update
+- 编辑 Update
 
-.删除 Delete
+- 删除 Delete
 
 ## 权限
 排序后的高权限角色适用前面角色的用例
@@ -86,4 +86,77 @@
 
 - 站长可以删除分类。
 
+### 目录说明
+* `doc` 用于存放说明文档
 
+* `core` 用于存放各种核心文件，如mysql
+* `public` 对外公开的静态文件，如css,js
+* `views` 模板文件
+* `router` 路由文件
+* `config` 各种配置文件，如数据库帐号密码
+
+### 使用到的组件
+
+* `koa`
+* `ejs`
+* `koa-bodyparser`
+* `koa-router`
+* `koa-views`
+* `koa-session`
+* `koa-static`
+* `mysql`
+
+``` bash
+yarn add koa koa-bodyparser koa-router koa-views koa-session  koa-static ejs mysql
+```
+### 引入各组件
+编辑`app.js`
+
+```js
+const koa = require('koa');
+const app = new koa();
+const bodyparser = require('koa-bodyparser');
+const session = require('koa-session');
+const path = require('path');
+const Router = require('./router/index');
+const static = require('koa-static');
+const views = require('koa-views');
+//设置session的key
+app.use(session({
+    key: 'koa-bbs',
+    maxAge: 86400000,
+},app));
+//注入post数据
+app.use(bodyparser());
+//设置静态目录
+app.use(static(path.join(__dirname), './public'));
+//设置模板目录并指定模板引擎
+app.use(views(path.join(__dirname), './views'), {
+    extends: 'ejs'
+});
+//设置路由
+Router(app);
+
+app.listen(3000, () => {
+    console.log('开启OK');
+})
+```
+在`router`下新建一个`index.js`用住全部路由控制。
+```js
+const router = require('koa-router')();
+module.exports = (app) => {
+    router.get('/', async (ctx, next) => {
+         ctx.body="首页";
+    });
+    router.get("/about", async (ctx, next) => {
+        ctx.body = "关于";
+    });
+    router.get("/help", async (ctx, next) => {
+        ctx.body="帮助";
+    });
+    //吧路由注入到app里面
+    app.use(router.routes());
+    //吧所有方法都注入到app里面
+    app.use(router.allowedMethods());
+}
+```
