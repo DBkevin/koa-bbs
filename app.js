@@ -16,9 +16,9 @@ app.use(bodyparser());
 //设置静态目录
 app.use(static(path.join(__dirname), './public'));
 //设置模板目录并指定模板引擎
-app.use(views(path.join(__dirname), './views'), {
-    extends: 'ejs'
-});
+app.use(views(path.join(__dirname, './views'), {
+    extension: 'ejs',
+}));
 //设置路由
 Router(app);
 
