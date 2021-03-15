@@ -1,0 +1,16 @@
+{
+  "name": "koa-bbs",
+  "version": "1.0.0",
+  "description": "一个基于koa2的bbs小项目",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=development && node app.js"
+  },
+  "keywords": [
+    "koa2",
+    "bbs"
+  ],
+  "author": "lee",
+  "license": "ISC"
+}
