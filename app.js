@@ -14,7 +14,9 @@ app.use(session({
 //注入post数据
 app.use(bodyparser());
 //设置静态目录
-app.use(static(path.join(__dirname), './public'));
+app.use(static(
+    path.join(__dirname, './public')
+));
 //设置模板目录并指定模板引擎
 app.use(views(path.join(__dirname, './views'), {
     extension: 'ejs',

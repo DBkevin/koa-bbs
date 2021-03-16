@@ -1,4 +1,6 @@
-@import 'bootstrap';
+@import "../node_modules/bootstrap/scss/bootstrap";
+@import "./font-awesome/scss/font-awesome.scss";
+$fa-font-path : "../font";
 body {
   font-family: Helvetica, "Microsoft YaHei", Arial, sans-serif;
   font-size: 14px;
