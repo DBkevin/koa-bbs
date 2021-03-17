@@ -6,9 +6,9 @@ const path = require('path');
 const Router = require('./router/index');
 const static = require('koa-static');
 const views = require('koa-views');
+app.keys = ['lee'];
 //设置session的key
 app.use(session({
-    key: 'koa-bbs',
     maxAge: 86400000,
 },app));
 //注入post数据
@@ -21,6 +21,11 @@ app.use(static(
 app.use(views(path.join(__dirname, './views'), {
     extension: 'ejs',
 }));
+//吧ctx传递给模板
+app.use(async (ctx, next) => {
+    ctx.state.ctx = ctx;
+    await next();
+});
 //设置路由
 Router(app);
 
