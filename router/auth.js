@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
     async register(ctx, next) {
          let ejsconfig = {
-            title: '首页',
+            title: '注册',
             pagename: '../auth/register',
             routerName: 'register',
         }
@@ -48,5 +48,44 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
         }
 
+    },
+    async login(ctx, next) {
+        let ejsconfig = {
+            title: '登陆',
+            pagename: '../auth/login',
+            routerName: 'login',
+        }
+        if (ctx.method === 'GET') {
+            await ctx.render("layouts/index", ejsconfig);
+            return;
+        }
+        let { name, password } = ctx.request.body;
+         //TODO 传递的参数校验防止注入
+        //先查找有无盖用户
+        let nameSQL = `select * from users where name="${name}"`;
+        let user = await db(nameSQL);
+        if (!user) {
+            ejsconfig['errors_name'] = "用户不存在，请核对或注册";
+            await ctx.render("layouts/index", ejsconfig);
+            return;
+        } else {
+            let comparsePwd =await bcrypt.compare(password, user[0].password);
+            if (comparsePwd) {
+                //密码正确允许登陆，设置session
+                ctx.session.user = {
+                    id: user[0].id,
+                    name: name,
+                };
+                await ctx.redirect('/');
+            } else {
+                ejsconfig['errors_password'] = "密码不匹配";
+                await ctx.render("layouts/index", ejsconfig);
+            }
+        }
+    },
+    async logout(ctx, next) {
+        ctx.session.user = null;
+        await ctx.redirect('/');
     }
+
 }

@@ -22,6 +22,9 @@ module.exports = (app) => {
 
     router.get('/register', require('./auth').register);
     router.post('/register', require('./auth').register);
+    router.get('/login', require('./auth').login);
+    router.post('/login', require('./auth').login);
+    router.get('/logout', require('./auth').logout);
     router.get("/about", async (ctx, next) => {
         ctx.body = "关于";
     });
