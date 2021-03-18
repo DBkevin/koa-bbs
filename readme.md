@@ -122,8 +122,8 @@ const Router = require('./router/index');
 const static = require('koa-static');
 const views = require('koa-views');
 //设置session的key
+app.use('lee')
 app.use(session({
-    key: 'koa-bbs',
     maxAge: 86400000,
 },app));
 //注入post数据
