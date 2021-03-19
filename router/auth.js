@@ -86,6 +86,17 @@ module.exports = {
     async logout(ctx, next) {
         ctx.session.user = null;
         await ctx.redirect('/');
+    },
+    async email(ctx, next) {
+        let ejsconfig = {
+            title: '重置密码',
+            pagename: '../auth/email',
+            routerName: 'reset',
+        }
+        if (ctx.method === 'GET') {
+            await ctx.render("layouts/index", ejsconfig);
+            return;
+        }
     }
 
 }

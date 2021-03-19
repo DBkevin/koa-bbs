@@ -25,6 +25,8 @@ module.exports = (app) => {
     router.get('/login', require('./auth').login);
     router.post('/login', require('./auth').login);
     router.get('/logout', require('./auth').logout);
+    router.get('/password/email', require('./auth').email);
+    router.post('/password/email', require('./auth').email);
     router.get("/about", async (ctx, next) => {
         ctx.body = "关于";
     });

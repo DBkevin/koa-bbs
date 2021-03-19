@@ -1,0 +1,38 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header"><%= title %></div>
+
+                <div class="card-body">
+                     <% if(locals.ok_email){ %>
+                        <div class="alert alert-success" role="alert">
+                           <%= ok_email %>
+                        </div>
+                       <% } %>
+                    <form method="POST" action="/password/email">
+                        <div class="form-group row">
+                            <label for="email" class="col-md-4 col-form-label text-md-right">邮箱地址</label>
+
+                            <div class="col-md-6">
+                                <input id="email" type="email" class="form-control <%=locals.errors_email?'is-invalid':'' %>" name="email" value="<%=locals.errors_email?email:'' %>" required autocomplete="email" autofocus>
+                                 <% if(locals.errors_email){ %>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><%=errors_email%></strong>
+                                    </span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    发送重置密码链接
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
