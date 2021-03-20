@@ -28,7 +28,12 @@ module.exports = (app) => {
     router.get('/password/email', require('./auth').email);
     router.post('/password/email', require('./auth').email);
     router.get("/about", async (ctx, next) => {
-        ctx.body = "关于";
+        await ctx.render("auth/email", {
+            url: 'http:/123123',
+            title: '123123',
+            copyright: new Date().getFullYear() ,
+
+        });
     });
     router.get("/help", async (ctx, next) => {
         ctx.body="帮助";

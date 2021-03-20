@@ -1,8 +1,12 @@
 const db = require('../core/db');
 const bcrypt = require('bcryptjs');
+const mail = require('../core/nodemailer');
+const mailHtml= require('../core/mailtoHtml');
+const stringRandom = require('string-random');
+const mailConfig = require("../config/index");
 module.exports = {
     async register(ctx, next) {
-         let ejsconfig = {
+        let ejsconfig = {
             title: '注册',
             pagename: '../auth/register',
             routerName: 'register',
@@ -11,12 +15,12 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
-        let { name, password, password_confirmation, captcha } = ctx.request.body;
+        let { name, password, password_confirmation, captcha, email } = ctx.request.body;
         let { text, expiration } = ctx.session.captcha;
         if (password !== password_confirmation) {
             ejsconfig['errors_password'] = "两次密码不一致，请重新输入";
             await ctx.render("layouts/index", ejsconfig);
-        } else if (expiration<Date.now()) {
+        } else if (expiration < Date.now()) {
             ejsconfig['errors_captcha'] = "验证码已经过期,请重新输入";
             await ctx.render("layouts/index", ejsconfig);
         } else if (captcha !== text) {
@@ -24,6 +28,13 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
         }
         //TODO 传递的参数校验防止注入
+        let emailUniqueSQL = `select * from users where email="${email}"`;
+        let emailUnique = await db(emailUniqueSQL);
+        if (emailUnique) {
+            ejsconfig['errors_email'] = "该邮箱已经注册，请登陆或更换邮箱";
+            await ctx.render("layouts/index", ejsconfig);
+            return;
+        }
         let nameSQL = `select * from users where name="${name}"`;
         let user = await db(nameSQL);
         if (!user) {
@@ -60,7 +71,7 @@ module.exports = {
             return;
         }
         let { name, password } = ctx.request.body;
-         //TODO 传递的参数校验防止注入
+        //TODO 传递的参数校验防止注入
         //先查找有无盖用户
         let nameSQL = `select * from users where name="${name}"`;
         let user = await db(nameSQL);
@@ -69,7 +80,7 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
             return;
         } else {
-            let comparsePwd =await bcrypt.compare(password, user[0].password);
+            let comparsePwd = await bcrypt.compare(password, user[0].password);
             if (comparsePwd) {
                 //密码正确允许登陆，设置session
                 ctx.session.user = {
@@ -94,6 +105,39 @@ module.exports = {
             routerName: 'reset',
         }
         if (ctx.method === 'GET') {
+            await ctx.render("layouts/index", ejsconfig);
+            return;
+        }
+        //TODO参数校验，防止注入
+        const { email } = ctx.request.body;
+        let emailUniqueSQL = `select * from users where email="${email}"`;
+        let emailUnique = await db(emailUniqueSQL);
+        if (emailUnique) {
+            //生成随机字符串
+            let code = stringRandom(60);
+            let expiration = Date.now() + 600000;
+            //插入数据库并添加上时间
+            let upCodeSQL = `update users set remember_token="${code}",remember_token_expiration=${expiration} where id=${emailUnique[0].id}`;
+            const upCode = await db(upCodeSQL);
+            if (upCode) {
+                let url =`password/repass/${code}`;
+                let html = new mailHtml('auth/repass.ejs', url);
+                let mailOptions = {
+                    from:mailConfig.mailConfig.auth.user, //发送者邮件地址(发件人地址)
+                    to: emailUnique[0].email, //收件人地址
+                    subject: '重置密码重置',//邮件标题
+                    html: html.buildHtml(),//邮件内容
+                };
+                let testmail = new mail(mailOptions);
+                if (!testmail) {
+                    ctx.body = "系统错误，请稍后再试或联系管理员";
+                }
+                await ctx.redirect('/');
+            } else {
+                ctx.body = "系统错误，请稍后再试";
+            }
+        } else {
+            ejsconfig['errors_email'] = "该邮箱不存在，请确认";
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
