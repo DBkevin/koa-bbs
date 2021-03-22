@@ -29,6 +29,9 @@ module.exports = (app) => {
     router.post('/password/reset/email', require('./auth').email);
     router.get('/password/reset/:member_token', require('./auth').reset);
     router.post('/password/reset', require('./auth').reset);
+    router.get('/users/:user', require('./users').show);
+    router.get('/users/:user/edit', require('./users').edit);
+    router.post('/users/:user', require("./users").update);
     router.get("/about", async (ctx, next) => {
         await ctx.render("auth/email", {
             url: 'http:/123123',
