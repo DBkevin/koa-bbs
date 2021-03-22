@@ -21,10 +21,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` char(255) COLLATE utf8mb4_bin NOT NULL COMMENT '用户名唯一',
   `password` char(255) COLLATE utf8mb4_bin NOT NULL COMMENT '用户密码',
+  `email` char(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户邮箱',
+  `remember_token` char(100) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '重置密码的随机字符串',
+  `remember_token_expiration` bigint(13) DEFAULT NULL,
   `avatar` char(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户头像',
   `introduction` char(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户简介',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `emial` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户表';
 
 -- 数据导出被取消选择。
