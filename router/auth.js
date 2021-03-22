@@ -1,7 +1,7 @@
 const db = require('../core/db');
 const bcrypt = require('bcryptjs');
 const mail = require('../core/nodemailer');
-const mailHtml= require('../core/mailtoHtml');
+const mailHtml = require('../core/mailtoHtml');
 const stringRandom = require('string-random');
 const mailConfig = require("../config/index");
 module.exports = {
@@ -120,10 +120,10 @@ module.exports = {
             let upCodeSQL = `update users set remember_token="${code}",remember_token_expiration=${expiration} where id=${emailUnique[0].id}`;
             const upCode = await db(upCodeSQL);
             if (upCode) {
-                let url =`password/repass/${code}`;
+                let url = `password/reset/${code}`;
                 let html = new mailHtml('auth/repass.ejs', url);
                 let mailOptions = {
-                    from:mailConfig.mailConfig.auth.user, //发送者邮件地址(发件人地址)
+                    from: mailConfig.mailConfig.auth.user, //发送者邮件地址(发件人地址)
                     to: emailUnique[0].email, //收件人地址
                     subject: '重置密码重置',//邮件标题
                     html: html.buildHtml(),//邮件内容
@@ -132,15 +132,59 @@ module.exports = {
                 if (!testmail) {
                     ctx.body = "系统错误，请稍后再试或联系管理员";
                 }
-                await ctx.redirect('/');
+                ejsconfig['success'] = "邮件发送成功，请在10分钟内处理";
+                await ctx.render('layouts/index', ejsconfig);
             } else {
                 ctx.body = "系统错误，请稍后再试";
             }
         } else {
             ejsconfig['errors_email'] = "该邮箱不存在，请确认";
+            ejsconfig['email'] = email;
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
+    },
+    async reset(ctx, next) {
+        let ejsconfig = {
+            title: '重置密码',
+            pagename: '../auth/reset',
+            routerName: 'reset',
+        }
+        if (ctx.method === 'GET') {
+            let {member_token} = ctx.params;
+            let queryTokenSQL = `select * from users where remember_token="${member_token}"`;
+            let queryToken = await db(queryTokenSQL);
+            if (queryToken && queryToken[0].remember_token_expiration >= Date.now()) {
+                ejsconfig['member_token'] = member_token;
+                await ctx.render("layouts/index", ejsconfig);
+            } else {
+                ejsconfig['pagename'] = '../auth/email';
+                ejsconfig['danger']='重置密码错误，请重新提交请求';
+                await ctx.render('layouts/index', ejsconfig);
+            }
+            return;
+        }
+        let { name, password, password_confirmation,member_token} = ctx.request.body;
+        if (password !== password_confirmation) {
+            ejsconfig['errors_password'] = "两次密码不一致，请重新输入";
+            await ctx.render("layouts/index", ejsconfig);
+        }
+        let userSQL = `select * from users where name="${name}"`;
+        let user = await db(userSQL);
+        if (user && user[0].remember_token === member_token && user[0].remember_token_expiration >= Date.now()) {
+           // 生成salt
+            const salt = await bcrypt.genSalt(10);
+            password = await bcrypt.hash(password, salt);
+            let upPassSQL = `update users SET password="${password}",remember_token=NULL,remember_token_expiration=NULL where id=${user[0].id}`;
+            let upPass = await db(upPassSQL);
+            if (upPass) {
+                ejsconfig['success'] = '密码重置成功！';
+                ejsconfig['pagename'] = '../auth/login';
+                await ctx.render('layouts/index', ejsconfig);
+            }
+        } else {
+            ejsconfig['danger'] = '信息核验失败！';
+            await ctx.render('layouts/index', ejsconfig);
+        }
     }
-
 }

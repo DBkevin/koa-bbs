@@ -1,0 +1,61 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <%= title %>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/password/reset">
+                        <div class="form-group row">
+                            <label for="name" class="col-md-4 col-form-label text-md-right">用户名</label>
+                            <div class="col-md-6">
+                                <input id="name" type="text"
+                                    class="form-control  <%= locals.errors_name?'is-invalid':'' %>" name="name"
+                                    value="  <%= locals.old_name? old_name:'' %>" required autocomplete="您的用户名"
+                                    autofocus>
+                                <% if(locals.errors_name){ %>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>
+                                            <%=errors_name%>
+                                        </strong>
+                                    </span>
+                                    <% } %>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="password" class="col-md-4 col-form-label text-md-right">新密码</label>
+                            <div class="col-md-6">
+                                <input id="password" type="password" <%= locals.errors_password?'is-invalid':'' %>
+                                    class="form-control " name="password"
+                                    required autocomplete="新密码">
+                                <% if(locals.errors_password){ %>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>
+                                            <%=errors_password%>
+                                        </strong>
+                                    </span>
+                                    <% } %>
+                            </div>
+                        </div>
+                        <input type="hidden" name="member_token" value="<%= member_token%>">
+                        <div class="form-group row">
+                            <label for="password-confirm" class="col-md-4 col-form-label text-md-right">重复密码</label>
+                            <div class="col-md-6">
+                                <input id="password-confirm" type="password" class="form-control"
+                                    name="password_confirmation" required autocomplete="新密码">
+                            </div>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    重置密码
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

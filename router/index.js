@@ -25,14 +25,15 @@ module.exports = (app) => {
     router.get('/login', require('./auth').login);
     router.post('/login', require('./auth').login);
     router.get('/logout', require('./auth').logout);
-    router.get('/password/email', require('./auth').email);
-    router.post('/password/email', require('./auth').email);
+    router.get('/password/reset', require('./auth').email);
+    router.post('/password/reset/email', require('./auth').email);
+    router.get('/password/reset/:member_token', require('./auth').reset);
+    router.post('/password/reset', require('./auth').reset);
     router.get("/about", async (ctx, next) => {
         await ctx.render("auth/email", {
             url: 'http:/123123',
             title: '123123',
             copyright: new Date().getFullYear() ,
-
         });
     });
     router.get("/help", async (ctx, next) => {

@@ -16,8 +16,8 @@
   <div id="app" class="<%= routerName%>-page">
 
     <%- include("./_header.ejs") %>
-
     <div class="container">
+    <%- include("./_message.ejs") %>
     <% var page =pagename+".ejs" %>
       <%- include(page) %>
     </div>

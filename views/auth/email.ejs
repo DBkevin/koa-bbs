@@ -10,10 +10,9 @@
                            <%= ok_email %>
                         </div>
                        <% } %>
-                    <form method="POST" action="/password/email">
+                    <form method="POST" action="/password/reset/email">
                         <div class="form-group row">
                             <label for="email" class="col-md-4 col-form-label text-md-right">邮箱地址</label>
-
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control <%=locals.errors_email?'is-invalid':'' %>" name="email" value="<%=locals.errors_email?email:'' %>" required autocomplete="email" autofocus>
                                  <% if(locals.errors_email){ %>
