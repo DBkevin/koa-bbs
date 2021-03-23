@@ -33,11 +33,10 @@ module.exports = (app) => {
     router.get('/users/:user/edit', require('./users').edit);
     router.post('/users/:user', require("./users").update);
     router.get("/about", async (ctx, next) => {
-        await ctx.render("auth/email", {
-            url: 'http:/123123',
-            title: '123123',
-            copyright: new Date().getFullYear() ,
-        });
+        ctx.session.info = {
+            success: '从about跳转',
+        };
+        ctx.redirect("/");
     });
     router.get("/help", async (ctx, next) => {
         ctx.body="帮助";
