@@ -1,5 +1,7 @@
 const router = require('koa-router')();
 const captchaCode = require('../middleware/captcha');
+const upload = require('../core/upload');
+const auth = require('../middleware/auth');
 module.exports = (app) => {
     router.get('/', async (ctx, next) => {
         await ctx.render('layouts/index',
@@ -30,8 +32,8 @@ module.exports = (app) => {
     router.get('/password/reset/:member_token', require('./auth').reset);
     router.post('/password/reset', require('./auth').reset);
     router.get('/users/:user', require('./users').show);
-    router.get('/users/:user/edit', require('./users').edit);
-    router.post('/users/:user', require("./users").update);
+    router.get('/users/:user/edit',auth(), require('./users').edit);
+    router.post('/users/:user', upload.single('avatar'),require('./users').update);
     router.get("/about", async (ctx, next) => {
         ctx.session.info = {
             success: '从about跳转',

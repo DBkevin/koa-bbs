@@ -86,6 +86,7 @@ module.exports = {
                 ctx.session.user = {
                     id: user[0].id,
                     name: name,
+                    avatar:user[0].avatar,
                 };
                 await ctx.redirect('/');
             } else {
