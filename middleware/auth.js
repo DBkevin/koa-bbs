@@ -1,4 +1,4 @@
-module.exports = (app) => {
+module.exports = () => {
     return async (ctx, next) => {
         if (ctx.session.user) {
             await next();

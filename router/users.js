@@ -50,10 +50,10 @@ module.exports = {
             avatar = avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
         }
         let { user } = ctx.params;
-        console.log(user);
-        if (authorize(false)) {
-            console.log('走盘定了');
-        };
+        if (!authorize(ctx, user)) {
+            await ctx.redirect('/');
+            return;
+        } 
         let { introduction } = ctx.req.body;
         if (introduction.length < 10) {
             console.log("进入");

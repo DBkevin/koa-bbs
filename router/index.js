@@ -33,7 +33,7 @@ module.exports = (app) => {
     router.post('/password/reset', require('./auth').reset);
     router.get('/users/:user', require('./users').show);
     router.get('/users/:user/edit',auth(), require('./users').edit);
-    router.post('/users/:user', upload.single('avatar'),require('./users').update);
+    router.post('/users/:user', upload.single('avatar'),auth(),require('./users').update);
     router.get("/about", async (ctx, next) => {
         ctx.session.info = {
             success: '从about跳转',

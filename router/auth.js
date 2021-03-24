@@ -42,7 +42,7 @@ module.exports = {
             const salt = await bcrypt.genSalt(10);
             password = await bcrypt.hash(password, salt);
             // 拼接新增语句
-            let userSQL = `insert into users(NAME,PASSWORD) values("${name}","${password}")`;
+            let userSQL = `insert into users(NAME,PASSWORD,email) values("${name}","${password}","${email})`;
             console.log(userSQL);
             //存储到数据库
             await db(userSQL).then((result) => {
