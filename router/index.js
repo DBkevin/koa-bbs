@@ -36,6 +36,8 @@ module.exports = (app) => {
     router.post('/users/:user', upload.single('avatar'), auth(), require('./users').update);
     //topics
     router.get('/topics', require("./topics").index);
+    router.get('/categories/:id', require('./topics').categoriesShow);
+
     router.get("/about", async (ctx, next) => {
         ctx.session.info = {
             success: '从about跳转',
