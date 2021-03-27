@@ -3,18 +3,35 @@ const timeago = require('timeago.js');
 const imageSize = require('image-size');
 const fs = require('fs');
 const authorize = require('../middleware/authorize');
+const pagination = require('../middleware/pagination');
 module.exports = {
     async show(ctx, next) {
         let { user } = ctx.params;
         let queryUserSQL = `select * from users where id=${user}`;
         let queryUser = await db(queryUserSQL);
         if (queryUser) {
-            queryUser[0].created_at = timeago.format(queryUser[0].created_at, 'zh_CN');
+        //分页 参数
+        let page = ctx.query.page ? ctx.query.page : 1;
+        let limit = 5;
+        let offset = (page - 1) * limit;
+        //获取总数
+        let Count = await db(`select count(id)AS count from topics where user_id=${user}`);
+        //计算累计多少页
+        let pageCount = Math.ceil(Count[0].count / limit);
+        let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user})  limit ${limit} offset ${offset} `;
+        let topics = await db(listSQL);
+        topics.forEach(item=> {
+            item.updated_at = timeago.format(item.updated_at, 'zh_CN');
+        });
+        pageList=pagination(pageCount,`users/${user}`, page),
+        queryUser[0].created_at = timeago.format(queryUser[0].created_at, 'zh_CN');
             await ctx.render("layouts/index", {
                 title: queryUser[0].name + '的个人中心',
                 pagename: '../users/show',
                 routerName: 'show',
-                user: queryUser[0]
+                user: queryUser[0],
+                topics: topics,
+                pagination: pageList,
             });
         } else {
             ctx.body = "用户不存在！";

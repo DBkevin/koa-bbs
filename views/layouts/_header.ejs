@@ -36,8 +36,8 @@
               <a class="dropdown-item" href="/users/<%=ctx.session.user.id %>/edit">编辑资料</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" id="logout" href="javascript:void(0)">
-                <form action="/logout" method="get">
-                  <button class="btn btn-block btn-danger" type="submit" name="button">退出</button>
+                <form action="/logout" method="get" onsubmit="return confirm('您确定要退出吗？');">
+                  <button class="btn btn-block btn-danger" type="submit"  name="button">退出</button>
                 </form>
               </a>
             </div>
