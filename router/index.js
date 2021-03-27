@@ -32,11 +32,13 @@ module.exports = (app) => {
     router.get('/password/reset/:member_token', require('./auth').reset);
     router.post('/password/reset', require('./auth').reset);
     router.get('/users/:user', require('./users').show);
-    router.get('/users/:user/edit',auth(), require('./users').edit);
+    router.get('/users/:user/edit', auth(), require('./users').edit);
     router.post('/users/:user', upload.single('avatar'), auth(), require('./users').update);
     //topics
     router.get('/topics', require("./topics").index);
-    router.get('/categories/:id', require('./topics').categoriesShow);
+    router.get('/topics/create',auth(), require('./topics').create);
+    router.post('/topics/create',auth(), require('./topics').create);
+    router.get('/categories/:id',require('./topics').categoriesShow);
 
     router.get("/about", async (ctx, next) => {
         ctx.session.info = {

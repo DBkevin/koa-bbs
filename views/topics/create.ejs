@@ -1,0 +1,47 @@
+<div class="container">
+    <div class="col-md-10 offset-md-1">
+        <div class="card ">
+
+            <div class="card-body">
+                <h2 class="">
+                    <i class="far fa-edit"></i>
+                    <%= title %>
+                </h2>
+
+                <hr>
+
+                <% if(locals.topic){ %>
+                    <form action="/topics/<%= topic.id %>" method="POST" accept-charset="UTF-8">
+                        <% } else { %>
+                            <form action="/topics/create" method="POST" accept-charset="UTF-8">
+                                <% }%>
+                                    <%- include("../layouts/_error.ejs") %>
+                                        <div class="form-group">
+                                            <input class="form-control" type="text" name="title" value=""
+                                                placeholder="请填写标题" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <select class="form-control" name="category_id" required>
+                                                <option value="" hidden disabled selected>请选择分类</option>
+                                                <% categories.forEach(function(item){%>
+                                                    <option value="<%= item.id %>">
+                                                        <%= item.name %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <textarea name="body" class="form-control" id="editor" rows="6"
+                                                placeholder="请填入至少三个字符的内容。" required></textarea>
+                                        </div>
+
+                                        <div class="well well-sm">
+                                            <button type="submit" class="btn btn-primary"><i class="far fa-save mr-2"
+                                                    aria-hidden="true"></i> 保存</button>
+                                        </div>
+                            </form>
+            </div>
+        </div>
+    </div>
+</div>

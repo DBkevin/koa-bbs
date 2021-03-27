@@ -1,6 +1,7 @@
 const db = require('../core/db');
 const timeago = require('timeago.js');
 const pagination = require('../middleware/pagination');
+const authorize = require('../middleware/authorize')
 exports = module.exports = {
     async index(ctx, next) {
         $topicsViewConfig = {
@@ -59,6 +60,31 @@ exports = module.exports = {
         $topicsViewConfig.topics = topics;
         $topicsViewConfig.pagination = pagination(pageCount, `categories/${id}`, page);
         await ctx.render('layouts/index', $topicsViewConfig);
+    },
+    async create(ctx,next) {
+        const topicsViewConfig = {
+            title: '发布话题',
+            pagename: '../topics/create',
+            routerName: 'topics-create',
+        };
+        if (ctx.method === "GET") {
+            //获取类别
+            let categoriesSQL = `SELECT id,name from categories`;
+            let categories = await db(categoriesSQL);
+            topicsViewConfig.categories = categories;
+            await ctx.render('layouts/index', topicsViewConfig);
+            return;
+        }
+        const { title, category_id, body } = ctx.request.body;
+        //TODO 数据校验
+        let insertTopics = `insert into topics (title,body,user_id,category_id) values("${title}","${body}",${ctx.session.user.id},${category_id})`;
+        let topic = await db(insertTopics);
+        if (topic) {
+            ctx.session.info = {
+                    success: '话题发布成功',
+            };
+            ctx.redirect('back');
+        }
     }
    
 }

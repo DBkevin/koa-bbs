@@ -18,7 +18,7 @@ module.exports = {
         let Count = await db(`select count(id)AS count from topics where user_id=${user}`);
         //计算累计多少页
         let pageCount = Math.ceil(Count[0].count / limit);
-        let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user})  limit ${limit} offset ${offset} `;
+        let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user}) order by t.id desc limit ${limit} offset ${offset} `;
         let topics = await db(listSQL);
         topics.forEach(item=> {
             item.updated_at = timeago.format(item.updated_at, 'zh_CN');
