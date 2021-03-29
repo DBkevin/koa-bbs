@@ -155,3 +155,32 @@ async create(ctx,next) {
 ```js
   router.get('/topics/:id', require("./topics").show);
 ```
+然后实现方法`router/topics.js`中的`show`方法：
+```js
+.
+.
+  async show(ctx, next) {
+        const { id } = ctx.params;
+        let isIdSQL = `select * from topics where id=${id}`;
+        let isId = await db(isIdSQL);
+
+        if (isId) {
+            const showInfoSQl = `SELECT u.id AS U_id, u.avatar AS U_avatar,u.name AS U_name, t.title AS T_title,t.id AS T_id,t.body as T_body,c.id AS C_id,c.name AS C_name,t.reply_count AS T_replay_count,t.created_at AS T_created_at FROM users u, topics t,categories c WHERE t.id=${id} AND t.user_id=u.id AND t.category_id=c.id`;
+            let showInfo = await db(showInfoSQl);
+            showInfo[0].T_created_at = timeago.format(showInfo[0].T_created_at, 'zh_CN');
+            const topic = showInfo[0];
+            const topicsViewConfig = {
+                title: `${showInfo[0].T_title}`,
+                pagename: '../topics/show',
+                routerName: 'topics-show',
+                topic,
+
+            };
+            await ctx.render('layouts/index', topicsViewConfig);
+        } else {
+            ctx.body = '没有该话题';
+        }
+
+    }
+```
+模板详情请查看 `views/topics/show.ejs`
