@@ -118,4 +118,35 @@ async create(ctx,next) {
 发布一条话题试试，如图6：
 好了，话题正常发布了，也可以显示在列表中了。
 接下来显示话题详情
-### 话题详情
+### 帖子图片上传
+发帖编辑器使用`Simditor` .[查看文档](https://simditor.tower.im/docs/doc-usage.html);接着我们来新建一个上传图片的接口,`router/index.js`:
+```js
+    router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);
+````
+然后实现该方法，`router/topics.js`:
+```js
+ async uploadImages(ctx, next) {
+        // 初始化返回数据，默认是失败的
+        const data = {
+            'success': false,
+            'msg': '上传失败!',
+            'file_path': ''
+        }
+        // 判断是否有上传文件，并赋值给 $file
+        if (ctx.req.file.path) {
+            let avatarList = ctx.req.file.destination.split('\\');
+            data.file_path= "/avatar/"+avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
+            data.msg = '上传成功';
+            data.success = true;
+        }
+
+        // 判断是否有上传文件，并赋值给 $filedd
+        ctx.status = 200;
+        ctx.set("Content-Type", "application/json");
+        ctx.body = JSON.stringify(data);
+    }
+
+}
+```
+上传一下测试看看。如图7：
+

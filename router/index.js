@@ -38,7 +38,9 @@ module.exports = (app) => {
     router.get('/topics', require("./topics").index);
     router.get('/topics/create',auth(), require('./topics').create);
     router.post('/topics/create',auth(), require('./topics').create);
-    router.get('/categories/:id',require('./topics').categoriesShow);
+    router.get('/categories/:id', require('./topics').categoriesShow);
+    //上传图片
+    router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);
 
     router.get("/about", async (ctx, next) => {
         ctx.session.info = {

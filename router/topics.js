@@ -9,7 +9,7 @@ exports = module.exports = {
             pagename: '../topics/index',
             routerName: 'topics-index',
         }
-          //排序参数
+        //排序参数
         let order = ctx.query.order ? ctx.query.order : 'default';
         let by = order == 'default' ? 'DESC' : 'ASC';
         console.log(by);
@@ -23,11 +23,11 @@ exports = module.exports = {
         let pageCount = Math.ceil(Count[0].count / limit);
         let listSQL = `SELECT u.name AS U_name,u.avatar as U_avatar,u.id AS U_id,c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,users u,categories c WHERE t.user_id=u.id AND t.category_id=c.id  ORDER BY t.id ${by}  limit 10 offset ${offset}`;
         let topics = await db(listSQL);
-        topics.forEach(item=> {
+        topics.forEach(item => {
             item.updated_at = timeago.format(item.updated_at, 'zh_CN');
         });
         $topicsViewConfig.topics = topics;
-        $topicsViewConfig.pagination = pagination(pageCount,'topics',page);
+        $topicsViewConfig.pagination = pagination(pageCount, 'topics', page);
         await ctx.render('layouts/index', $topicsViewConfig);
     },
     async categoriesShow(ctx, next) {
@@ -35,7 +35,7 @@ exports = module.exports = {
         //排序参数
         let order = ctx.query.order ? ctx.query.order : 'default';
         let by = order == 'default' ? 'DESC' : 'ASC';
-         //分页 参数
+        //分页 参数
         let page = ctx.query.page ? ctx.query.page : 1;
         let limit = 10;
         let offset = (page - 1) * 10;
@@ -61,7 +61,7 @@ exports = module.exports = {
         $topicsViewConfig.pagination = pagination(pageCount, `categories/${id}`, page);
         await ctx.render('layouts/index', $topicsViewConfig);
     },
-    async create(ctx,next) {
+    async create(ctx, next) {
         const topicsViewConfig = {
             title: '发布话题',
             pagename: '../topics/create',
@@ -81,10 +81,30 @@ exports = module.exports = {
         let topic = await db(insertTopics);
         if (topic) {
             ctx.session.info = {
-                    success: '话题发布成功',
+                success: '话题发布成功',
             };
             ctx.redirect('back');
         }
+    },
+    async uploadImages(ctx, next) {
+        // 初始化返回数据，默认是失败的
+        const data = {
+            'success': false,
+            'msg': '上传失败!',
+            'file_path': ''
+        }
+        // 判断是否有上传文件，并赋值给 $file
+        if (ctx.req.file.path) {
+            let avatarList = ctx.req.file.destination.split('\\');
+            data.file_path= "/avatar/"+avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
+            data.msg = '上传成功';
+            data.success = true;
+        }
+
+        // 判断是否有上传文件，并赋值给 $filedd
+        ctx.status = 200;
+        ctx.set("Content-Type", "application/json");
+        ctx.body = JSON.stringify(data);
     }
-   
+
 }
