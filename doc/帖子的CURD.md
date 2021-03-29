@@ -150,3 +150,8 @@ async create(ctx,next) {
 ```
 上传一下测试看看。如图7：
 
+### 显示话题详情
+添加话题详情的路由，以及实现该方法`router/index.js`:
+```js
+  router.get('/topics/:id', require("./topics").show);
+```

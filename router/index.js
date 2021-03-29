@@ -39,6 +39,7 @@ module.exports = (app) => {
     router.get('/topics/create',auth(), require('./topics').create);
     router.post('/topics/create',auth(), require('./topics').create);
     router.get('/categories/:id', require('./topics').categoriesShow);
+    router.get('/topics/:id', require("./topics").show);
     //上传图片
     router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);
 

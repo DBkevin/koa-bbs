@@ -67,7 +67,7 @@ exports = module.exports = {
             pagename: '../topics/create',
             routerName: 'topics-create',
         };
-        if (ctx.method === "GET") {
+        if (ctx.method === 'GET') {
             //获取类别
             let categoriesSQL = `SELECT id,name from categories`;
             let categories = await db(categoriesSQL);
@@ -77,13 +77,13 @@ exports = module.exports = {
         }
         const { title, category_id, body } = ctx.request.body;
         //TODO 数据校验
-        let insertTopics = `insert into topics (title,body,user_id,category_id) values("${title}","${body}",${ctx.session.user.id},${category_id})`;
+        let insertTopics = `insert into topics (title,body,user_id,category_id) values('${title}','${body}',${ctx.session.user.id},${category_id})`;
         let topic = await db(insertTopics);
         if (topic) {
             ctx.session.info = {
                 success: '话题发布成功',
             };
-            ctx.redirect('back');
+            ctx.redirect(`/topics/${topic.insertId}`);
         }
     },
     async uploadImages(ctx, next) {
@@ -96,7 +96,7 @@ exports = module.exports = {
         // 判断是否有上传文件，并赋值给 $file
         if (ctx.req.file.path) {
             let avatarList = ctx.req.file.destination.split('\\');
-            data.file_path= "/avatar/"+avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
+            data.file_path = "/avatar/" + avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
             data.msg = '上传成功';
             data.success = true;
         }
@@ -105,6 +105,29 @@ exports = module.exports = {
         ctx.status = 200;
         ctx.set("Content-Type", "application/json");
         ctx.body = JSON.stringify(data);
+    },
+    async show(ctx, next) {
+        const { id } = ctx.params;
+        let isIdSQL = `select * from topics where id=${id}`;
+        let isId = await db(isIdSQL);
+
+        if (isId) {
+            const showInfoSQl = `SELECT u.id AS U_id, u.avatar AS U_avatar,u.name AS U_name, t.title AS T_title,t.id AS T_id,t.body as T_body,c.id AS C_id,c.name AS C_name,t.reply_count AS T_replay_count,t.created_at AS T_created_at FROM users u, topics t,categories c WHERE t.id=${id} AND t.user_id=u.id AND t.category_id=c.id`;
+            let showInfo = await db(showInfoSQl);
+            showInfo[0].T_created_at = timeago.format(showInfo[0].T_created_at, 'zh_CN');
+            const topic = showInfo[0];
+            const topicsViewConfig = {
+                title: `${showInfo[0].T_title}`,
+                pagename: '../topics/show',
+                routerName: 'topics-show',
+                topic,
+
+            };
+            await ctx.render('layouts/index', topicsViewConfig);
+        } else {
+            ctx.body = '没有该话题';
+        }
+
     }
 
 }
