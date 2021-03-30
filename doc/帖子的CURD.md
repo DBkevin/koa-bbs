@@ -185,7 +185,7 @@ async create(ctx,next) {
 ```
 模板详情请查看 `views/topics/show.ejs`
 
-### XSS攻击
+### XSS攻击和sql注入
 防止xss攻击，我们使用`xss`组件，具体[查看文档](https://github.com/leizongmin/js-xss/blob/master/README.zh.md);
 先试着插入一条看看`xss攻击`是否存在，如图xss_1:
 
@@ -203,5 +203,27 @@ const xss = require('xss');
 .
 .
 ```
+之前的mysql查询我们没有进行任何过滤，这次一起给加上sql注入过滤`core/db.js`.我们使用`mysql`的`escape`方法来做转义[escape文档说明](https://www.npmjs.com/package/mysql#escaping-query-values);
+```js
+.
+.
+escape = (obj, param) => {
+    param.forEach(item => {
+        obj[item] = mysql.escape(obj[item]);
+    });
+    return obj;
+}
+module.exports = {
+    query,
+    escape
+}
+```
+然后在所有要查询的地方都加上`escape`如：`router/auth.js`中的`login`方法:
+```js
+   let { name, password, password_confirmation, captcha, email } = db.escape(ctx.request.body,['name','password','email']);
+```
+记得，所有的查询都要加上这样的转码，来过滤
+### 话题的编辑
+新建2个路由一个展示编辑页面，一个接收编辑后的信息， 编辑的时候要验证
 
 

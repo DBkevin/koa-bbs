@@ -15,7 +15,7 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
-        let { name, password, password_confirmation, captcha, email } = ctx.request.body;
+        let { name, password, password_confirmation, captcha, email } = db.escape(ctx.request.body,['name','password','email']);
         let { text, expiration } = ctx.session.captcha;
         if (password !== password_confirmation) {
             ejsconfig['errors_password'] = "两次密码不一致，请重新输入";
@@ -28,24 +28,24 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
         }
         //TODO 传递的参数校验防止注入
-        let emailUniqueSQL = `select * from users where email="${email}"`;
-        let emailUnique = await db(emailUniqueSQL);
+        let emailUniqueSQL = `select * from users where email=${email}`;
+        let emailUnique = await db.query(emailUniqueSQL);
         if (emailUnique) {
             ejsconfig['errors_email'] = "该邮箱已经注册，请登陆或更换邮箱";
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
-        let nameSQL = `select * from users where name="${name}"`;
-        let user = await db(nameSQL);
+        let nameSQL = `select * from users where name=${name}`;
+        let user = await db.query(nameSQL);
         if (!user) {
             // 生成salt
             const salt = await bcrypt.genSalt(10);
             password = await bcrypt.hash(password, salt);
             // 拼接新增语句
-            let userSQL = `insert into users(NAME,PASSWORD,email) values("${name}","${password}","${email})`;
+            let userSQL = `insert into users(NAME,PASSWORD,email) values(${name},${password},${email})`;
             console.log(userSQL);
             //存储到数据库
-            await db(userSQL).then((result) => {
+            await db.query(userSQL).then((result) => {
                 ctx.session.user = {
                     id: result.insertId,
                     name: name,
@@ -70,11 +70,11 @@ module.exports = {
             await ctx.render("layouts/index", ejsconfig);
             return;
         }
-        let { name, password } = ctx.request.body;
+        let { name, password } =db.escape(ctx.request.body,['name']);
         //TODO 传递的参数校验防止注入
         //先查找有无盖用户
-        let nameSQL = `select * from users where name="${name}"`;
-        let user = await db(nameSQL);
+        let nameSQL = `select * from users where name=${name}`;
+        let user = await db.query(nameSQL);
         if (!user) {
             ejsconfig['errors_name'] = "用户不存在，请核对或注册";
             await ctx.render("layouts/index", ejsconfig);
@@ -85,9 +85,10 @@ module.exports = {
                 //密码正确允许登陆，设置session
                 ctx.session.user = {
                     id: user[0].id,
-                    name: name,
-                    avatar:user[0].avatar,
+                    name:user[0].name,
+                    avatar: user[0].avatar,
                 };
+                console.log(ctx.session.user);
                 await ctx.redirect('/');
             } else {
                 ejsconfig['errors_password'] = "密码不匹配";
@@ -110,8 +111,8 @@ module.exports = {
             return;
         }
         //TODO参数校验，防止注入
-        const { email } = ctx.request.body;
-        let emailUniqueSQL = `select * from users where email="${email}"`;
+        const { email } = db.escape(ctx.request.body,['email']);
+        let emailUniqueSQL = `select * from users where email=${email}`;
         let emailUnique = await db(emailUniqueSQL);
         if (emailUnique) {
             //生成随机字符串
@@ -152,32 +153,33 @@ module.exports = {
             routerName: 'reset',
         }
         if (ctx.method === 'GET') {
-            let {member_token} = ctx.params;
-            let queryTokenSQL = `select * from users where remember_token="${member_token}"`;
-            let queryToken = await db(queryTokenSQL);
+            let { member_token } = db.escape(ctx.params,['member_token']);
+            let queryTokenSQL = `select * from users where remember_token=${member_token}`;
+            let queryToken = await db.query(queryTokenSQL);
             if (queryToken && queryToken[0].remember_token_expiration >= Date.now()) {
                 ejsconfig['member_token'] = member_token;
                 await ctx.render("layouts/index", ejsconfig);
             } else {
                 ejsconfig['pagename'] = '../auth/email';
-                ejsconfig['danger']='重置密码错误，请重新提交请求';
+                ejsconfig['danger'] = '重置密码错误，请重新提交请求';
                 await ctx.render('layouts/index', ejsconfig);
             }
             return;
         }
-        let { name, password, password_confirmation,member_token} = ctx.request.body;
+        let { name, password, password_confirmation, member_token } = db.escape(ctx.request.body,['name','member_token']);
         if (password !== password_confirmation) {
             ejsconfig['errors_password'] = "两次密码不一致，请重新输入";
             await ctx.render("layouts/index", ejsconfig);
         }
-        let userSQL = `select * from users where name="${name}"`;
-        let user = await db(userSQL);
+        let userSQL = `select * from users where name=${name}`;
+        let user = await db.query(userSQL);
         if (user && user[0].remember_token === member_token && user[0].remember_token_expiration >= Date.now()) {
-           // 生成salt
+            // 生成salt
             const salt = await bcrypt.genSalt(10);
             password = await bcrypt.hash(password, salt);
-            let upPassSQL = `update users SET password="${password}",remember_token=NULL,remember_token_expiration=NULL where id=${user[0].id}`;
-            let upPass = await db(upPassSQL);
+            password = db.cape(password);
+            let upPassSQL = `update users SET password=${password},remember_token=NULL,remember_token_expiration=NULL where id=${user[0].id}`;
+            let upPass = await db.query(upPassSQL);
             if (upPass) {
                 ejsconfig['success'] = '密码重置成功！';
                 ejsconfig['pagename'] = '../auth/login';

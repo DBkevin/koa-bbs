@@ -8,18 +8,18 @@ module.exports = {
     async show(ctx, next) {
         let { user } = ctx.params;
         let queryUserSQL = `select * from users where id=${user}`;
-        let queryUser = await db(queryUserSQL);
+        let queryUser = await db.query(queryUserSQL);
         if (queryUser) {
         //分页 参数
         let page = ctx.query.page ? ctx.query.page : 1;
         let limit = 5;
         let offset = (page - 1) * limit;
         //获取总数
-        let Count = await db(`select count(id)AS count from topics where user_id=${user}`);
+        let Count = await db.query(`select count(id)AS count from topics where user_id=${user}`);
         //计算累计多少页
         let pageCount = Math.ceil(Count[0].count / limit);
         let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user}) order by t.id desc limit ${limit} offset ${offset} `;
-        let topics = await db(listSQL);
+        let topics = await db.query(listSQL);
         topics.forEach(item=> {
             item.updated_at = timeago.format(item.updated_at, 'zh_CN');
         });
@@ -37,11 +37,10 @@ module.exports = {
             ctx.body = "用户不存在！";
         }
     },
-    async edit(ctx, next, newUser) {
-
+    async edit(ctx, next) {
         let { user } = ctx.params;
         let queryUserSQL = `select * from users where id=${user}`;
-        let queryUser = await db(queryUserSQL);
+        let queryUser = await db.query(queryUserSQL);
         if (queryUser) {
             await ctx.render("layouts/index", {
                 title: queryUser[0].name + '的个人中心',
@@ -67,6 +66,7 @@ module.exports = {
             avatar = avatarList[avatarList.length - 1] + '/' + ctx.req.file.filename;
         }
         let { user } = ctx.params;
+        user = Number(user);
         if (!authorize(ctx, user)) {
             await ctx.redirect('/');
             return;
@@ -80,11 +80,11 @@ module.exports = {
         }
         avatar ? '' : '无';
         let queryUserSQL = `select * from users where id=${user}`;
-        let queryUser = await db(queryUserSQL);
+        let queryUser = await db.query(queryUserSQL);
         if (queryUser) {
             //TODO 传递的参数校验
             let introductionSQL = `update users set introduction="${introduction}",avatar="${avatar}" where id=${queryUser[0].id}`;
-            let upIntroduct = await db(introductionSQL);
+            let upIntroduct = await db.query(introductionSQL);
             if (upIntroduct) {
                 ctx.session.info = {
                     success: '修改个人资料成功',

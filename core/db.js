@@ -2,7 +2,7 @@ const { dbName, dbHost, port, dbUser, dbPass } = require('../config/index').data
 const mysql = require('mysql');
 let pools = {};
 //创建一个connection
-module.exports=query = (sql, host = "127.0.0.1") => {
+query = (sql, host = "127.0.0.1") => {
     if (!pools.hasOwnProperty(host)) {
         pools[host] = mysql.createPool({
             host: dbHost,
@@ -33,4 +33,16 @@ module.exports=query = (sql, host = "127.0.0.1") => {
             }
         });
     });
+}
+
+function escape (obj, param)  {
+    param.forEach(item => {
+        obj[item] = mysql.escape(obj[item]);
+    });
+    return obj;
+}
+module.exports = {
+    query,
+    escape,
+    cape:mysql.escape
 }

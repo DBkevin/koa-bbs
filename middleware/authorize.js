@@ -1,4 +1,5 @@
 exports = module.exports = (ctx, user_id) => {
+    console.log(ctx.session.user.id === user_id);
     if (ctx.session.user.id !== user_id) {
         ctx.session.info = {
             danger: '权限不足!',

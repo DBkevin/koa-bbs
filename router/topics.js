@@ -13,17 +13,16 @@ exports = module.exports = {
         //排序参数
         let order = ctx.query.order ? ctx.query.order : 'default';
         let by = order == 'default' ? 'DESC' : 'ASC';
-        console.log(by);
         //分页 参数
         let page = ctx.query.page ? ctx.query.page : 1;
         let limit = 10;
         let offset = (page - 1) * 10;
         //获取总数
-        let Count = await db(`select count(id)AS count from topics`);
+        let Count = await db.query(`select count(id)AS count from topics`);
         //计算累计多少页
         let pageCount = Math.ceil(Count[0].count / limit);
         let listSQL = `SELECT u.name AS U_name,u.avatar as U_avatar,u.id AS U_id,c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,users u,categories c WHERE t.user_id=u.id AND t.category_id=c.id  ORDER BY t.id ${by}  limit 10 offset ${offset}`;
-        let topics = await db(listSQL);
+        let topics = await db.query(listSQL);
         topics.forEach(item => {
             item.updated_at = timeago.format(item.updated_at, 'zh_CN');
         });
@@ -32,7 +31,7 @@ exports = module.exports = {
         await ctx.render('layouts/index', $topicsViewConfig);
     },
     async categoriesShow(ctx, next) {
-        let id = ctx.params.id;
+        const {id}= db.escape(ctx.params,['id']);
         //排序参数
         let order = ctx.query.order ? ctx.query.order : 'default';
         let by = order == 'default' ? 'DESC' : 'ASC';
@@ -41,13 +40,13 @@ exports = module.exports = {
         let limit = 10;
         let offset = (page - 1) * 10;
         //获取总数
-        let Count = await db(`select count(id) AS count from topics where category_id=${id}`);
+        let Count = await db.query(`select count(id) AS count from topics where category_id=${id}`);
         //计算累计多少页
         let pageCount = Math.ceil(Count[0].count / limit);
         let categriesSQL = `select * from categories where id=${id}`;
-        let categories = await db(categriesSQL);
+        let categories = await db.query(categriesSQL);
         let listSQL = ` SELECT u.name AS U_name,u.avatar as U_avatar,u.id AS U_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,users u WHERE t.user_id=u.id AND t.category_id IN (${categories[0].id})  ORDER BY t.id ${by}  limit ${limit} offset ${offset} `;
-        let topics = await db(listSQL);
+        let topics = await db.query(listSQL);
         topics.forEach(item => {
             item.updated_at = timeago.format(item.updated_at, 'zh_CN');
             item.C_id = categories[0].id;
@@ -71,17 +70,17 @@ exports = module.exports = {
         if (ctx.method === 'GET') {
             //获取类别
             let categoriesSQL = `SELECT id,name from categories`;
-            let categories = await db(categoriesSQL);
+            let categories = await db.query(categoriesSQL);
             topicsViewConfig.categories = categories;
             await ctx.render('layouts/index', topicsViewConfig);
             return;
         }
-        const { title, category_id, body } = ctx.request.body;
+        const { title, category_id, body } = db.escape(ctx.request.body, ['title','category_id','body']);
         title = xss(title);
         body = xss(title);
         //TODO 数据校验
-        let insertTopics = `insert into topics (title,body,user_id,category_id) values('${title}','${body}',${ctx.session.user.id},${category_id})`;
-        let topic = await db(insertTopics);
+        let insertTopics = `insert into topics (title,body,user_id,category_id) values(${title},${body},${ctx.session.user.id},${category_id})`;
+        let topic = await db.query(insertTopics);
         if (topic) {
             ctx.session.info = {
                 success: '话题发布成功',
@@ -110,13 +109,12 @@ exports = module.exports = {
         ctx.body = JSON.stringify(data);
     },
     async show(ctx, next) {
-        const { id } = ctx.params;
+        const { id } = db.escape(ctx.params,['id']);
         let isIdSQL = `select * from topics where id=${id}`;
-        let isId = await db(isIdSQL);
-
+        let isId = await db.query(isIdSQL);
         if (isId) {
             const showInfoSQl = `SELECT u.id AS U_id, u.avatar AS U_avatar,u.name AS U_name, t.title AS T_title,t.id AS T_id,t.body as T_body,c.id AS C_id,c.name AS C_name,t.reply_count AS T_replay_count,t.created_at AS T_created_at FROM users u, topics t,categories c WHERE t.id=${id} AND t.user_id=u.id AND t.category_id=c.id`;
-            let showInfo = await db(showInfoSQl);
+            let showInfo = await db.query(showInfoSQl);
             showInfo[0].T_created_at = timeago.format(showInfo[0].T_created_at, 'zh_CN');
             const topic = showInfo[0];
             const topicsViewConfig = {
