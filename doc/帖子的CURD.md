@@ -184,3 +184,24 @@ async create(ctx,next) {
     }
 ```
 模板详情请查看 `views/topics/show.ejs`
+
+### XSS攻击
+防止xss攻击，我们使用`xss`组件，具体[查看文档](https://github.com/leizongmin/js-xss/blob/master/README.zh.md);
+先试着插入一条看看`xss攻击`是否存在，如图xss_1:
+
+然后打开该帖子，如图xss_2：
+
+这说明xss漏洞存在，我们修改一下`router/topics.js`：
+```js
+const xss = require('xss');
+.
+.
+     const { title, category_id, body } = ctx.request.body;
+        title = xss(title);
+        body = xss(title);
+
+.
+.
+```
+
+

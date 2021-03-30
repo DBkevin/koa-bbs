@@ -1,7 +1,8 @@
 const db = require('../core/db');
 const timeago = require('timeago.js');
 const pagination = require('../middleware/pagination');
-const authorize = require('../middleware/authorize')
+const authorize = require('../middleware/authorize');
+const xss = require('xss');
 exports = module.exports = {
     async index(ctx, next) {
         $topicsViewConfig = {
@@ -76,6 +77,8 @@ exports = module.exports = {
             return;
         }
         const { title, category_id, body } = ctx.request.body;
+        title = xss(title);
+        body = xss(title);
         //TODO 数据校验
         let insertTopics = `insert into topics (title,body,user_id,category_id) values('${title}','${body}',${ctx.session.user.id},${category_id})`;
         let topic = await db(insertTopics);
