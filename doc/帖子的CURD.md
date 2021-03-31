@@ -4,7 +4,7 @@
 先修改个人页面的模板，把暂无内容替换为【ta的话题】和【ta的回复】两个入口：
  具体视图代码查看 *`views/users/show.ejs`*
  然后再`router/user.js`中的`show`方法中添加分页，查询用户发的帖子，并传递给视图模板：
- ```js
+```js
  .
  .
 async show(ctx, next) {
@@ -40,7 +40,7 @@ async show(ctx, next) {
 	}
 },
 .
- ```
+```
 *记得把`midleware/pagination.js`引入进来*
 好了，现在个人页面也能看到个人发的所有帖子了，如图1：
 
@@ -288,5 +288,35 @@ module.exports = {
 ```
 好了  编辑效果已经处理好了。
 #### 删除话题
-
+删除先新建一条路由，来接收删除请求`router/index.js`:
+```js
+    router.post('/topics/:id/destory', auth(), require('./topics').destory);
+```
+然后在`router/topics.js`中新建方法`destory`:
+```js
+  async destory(ctx, next) {
+        const { id } = db.escape(ctx.params, ['id']);
+        let topicSQl = `select * from topics where id=${id}`;
+        let topic= await db.query(topicSQl);
+        if (topic) {
+            if (authorize(ctx, topic[0].user_id)) {
+                let deleteSQL = `delete from topics where id=${id}`;
+                let de  = await db.query(deleteSQL);
+                if (de) {
+                    ctx.session.info = {
+                        success: '删除成功',
+                    };
+                   ctx.redirect('/topics');
+                }
+            }
+        } else {
+            ctx.session.info = {
+                danger: "文档不存在"
+            };
+            ctx.redirect('back');
+        }
+    }
+```
+好了 删除功能也好了，支持 帖子的创建，更新，删除，查看都好了。
+下一章进行 帖子的回复功能
 

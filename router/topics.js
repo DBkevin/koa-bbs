@@ -3,6 +3,7 @@ const timeago = require('timeago.js');
 const pagination = require('../middleware/pagination');
 const authorize = require('../middleware/authorize');
 const xss = require('xss');
+const update = require('../middleware/update');
 exports = module.exports = {
     async index(ctx, next) {
         $topicsViewConfig = {
@@ -113,16 +114,17 @@ exports = module.exports = {
         let isIdSQL = `select * from topics where id=${id}`;
         let isId = await db.query(isIdSQL);
         if (isId) {
-            const showInfoSQl = `SELECT u.id AS U_id, u.avatar AS U_avatar,u.name AS U_name, t.title AS T_title,t.id AS T_id,t.body as T_body,c.id AS C_id,c.name AS C_name,t.reply_count AS T_replay_count,t.created_at AS T_created_at FROM users u, topics t,categories c WHERE t.id=${id} AND t.user_id=u.id AND t.category_id=c.id`;
+            const showInfoSQl = `SELECT u.id AS U_id, u.avatar AS U_avatar,u.name AS U_name, t.title AS T_title,t.id AS T_id,t.body as T_body,t.user_id AS T_user_id,c.id AS C_id,c.name AS C_name,t.reply_count AS T_replay_count,t.created_at AS T_created_at FROM users u, topics t,categories c WHERE t.id=${id} AND t.user_id=u.id AND t.category_id=c.id`;
             let showInfo = await db.query(showInfoSQl);
             showInfo[0].T_created_at = timeago.format(showInfo[0].T_created_at, 'zh_CN');
             const topic = showInfo[0];
+            let author = update(ctx, topic.T_user_id);
             const topicsViewConfig = {
                 title: `${showInfo[0].T_title}`,
                 pagename: '../topics/show',
                 routerName: 'topics-show',
                 topic,
-
+                author
             };
             await ctx.render('layouts/index', topicsViewConfig);
         } else {
@@ -180,7 +182,29 @@ exports = module.exports = {
 
         } else {
             ctx.session.info = {
-                dange: '不存在该文档'
+                danger: '不存在该文档'
+            };
+            ctx.redirect('back');
+        }
+    },
+    async destory(ctx, next) {
+        const { id } = db.escape(ctx.params, ['id']);
+        let topicSQl = `select * from topics where id=${id}`;
+        let topic= await db.query(topicSQl);
+        if (topic) {
+            if (authorize(ctx, topic[0].user_id)) {
+                let deleteSQL = `delete from topics where id=${id}`;
+                let de  = await db.query(deleteSQL);
+                if (de) {
+                    ctx.session.info = {
+                        success: '删除成功',
+                    };
+                   ctx.redirect('/topics');
+                }
+            }
+        } else {
+            ctx.session.info = {
+                danger: "文档不存在"
             };
             ctx.redirect('back');
         }

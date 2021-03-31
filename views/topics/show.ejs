@@ -21,30 +21,33 @@
         <div class="card ">
             <div class="card-body">
                 <h1 class="text-center mt-3 mb-3">
-                   <%= topic.T_title %>
+                    <%= topic.T_title %>
                 </h1>
 
                 <div class="article-meta text-center text-secondary">
-                    <%=  topic.T_created_at %>
-                    ⋅
-                    <i class="far fa-comment"></i>
-                    <%= topic.T_replay_count %>
+                    <%= topic.T_created_at %>
+                        ⋅
+                        <i class="fa fa-comment"></i>
+                        <%= topic.T_replay_count %>
                 </div>
 
                 <div class="topic-body mt-4 mb-4">
-                   <%- topic.T_body %>
+                    <%- topic.T_body %>
                 </div>
-
-                <div class="operate">
-                    <hr>
-                    <a href="/topics/<%=topic.T_id %>/edit" class="btn btn-outline-secondary btn-sm"
-                        role="button">
-                        <i class="far fa-edit"></i> 编辑
-                    </a>
-                    <a href="#" class="btn btn-outline-secondary btn-sm" role="button">
-                        <i class="far fa-trash-alt"></i> 删除
-                    </a>
-                </div>
+                <% if(author){%>
+                    <div class="operate">
+                        <hr>
+                        <a href="/topics/<%=topic.T_id %>/edit" class="btn btn-outline-secondary btn-sm" role="button">
+                            <i class="fa fa-edit"></i> 编辑
+                        </a>
+                        <form action="/topics/<%= topic.T_id %>/destory" method="post"
+                            style="display: inline-block;" onsubmit="return confirm('您确定要删除吗？');">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="fa fa-trash"></i> 删除
+                            </button>
+                        </form>
+                    </div>
+                    <% } %>
 
             </div>
         </div>

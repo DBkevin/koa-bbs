@@ -41,7 +41,8 @@ module.exports = (app) => {
     router.get('/categories/:id', require('./topics').categoriesShow);
     router.get('/topics/:id', require("./topics").show);
     router.get('/topics/:id/edit', auth(),require("./topics").edit);
-    router.post('/topics/:id/update', auth(),require("./topics").update);
+    router.post('/topics/:id/update', auth(), require("./topics").update);
+    router.post('/topics/:id/destory', auth(), require('./topics').destory);
     //上传图片
     router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);
 
