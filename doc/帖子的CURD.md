@@ -222,8 +222,71 @@ module.exports = {
 ```js
    let { name, password, password_confirmation, captcha, email } = db.escape(ctx.request.body,['name','password','email']);
 ```
-记得，所有的查询都要加上这样的转码，来过滤
+记得，所有的查询都要加上这样的转码，来过滤SQL注入
 ### 话题的编辑
-新建2个路由一个展示编辑页面，一个接收编辑后的信息， 编辑的时候要验证
+新建2个路由一个展示编辑页面，一个接收编辑后的信息， 编辑的时候要验证改文章的user_id是否就是当前登陆的user_id。`router/index.js`：
+```js
+ router.get('/topics/:id/edit', auth(),require("./topics").edit);
+ router.post('/topics/:id/update', auth(),require("./topics").update);
+```
+然后在`router/topics.js`中处理逻辑：
+```js
+  async edit(ctx, next) {
+        const { id } = db.escape(ctx.params, ['id']);
+        let topicSQL = `SELECT u.name AS U_name,u.id AS U_id,u.avatar AS U_avatar, t.* FROM topics t,users u WHERE t.id=${id} AND t.user_id =u.id `;
+        let topic = await db.query(topicSQL);
+        if (topic) {
+            if (!authorize(ctx, topic[0].user_id)) {
+                ctx.redirect('back');
+                return;
+            }
+            //获取分类数据
+            let categoriesSQL = `SELECT id,name from categories`;
+            let categories = await db.query(categoriesSQL);
+            const topicsViewConfig = {
+                title: `${topic[0].title}`,
+                pagename: '../topics/create',
+                routerName: 'topics-create',
+                topic: topic[0]
+            };
+            topicsViewConfig.categories = categories;
+            await ctx.render('layouts/index', topicsViewConfig);
+        } else {
+            ctx.body = "没有该话题";
+        }
+    },
+    async update(ctx, next) {
+        const { id }  = db.escape(ctx.params, ['id']);
+        let topicSQl = `select * from topics where id=${id}`;
+        let topic = await db.query(topicSQl);
+        if (topic) {
+            if (authorize(ctx, topic[0].user_id)) {
+               let { title, category_id, body } = db.escape(ctx.request.body, ['title', 'category_id']);
+                title = xss(title);
+                body = xss(body);
+                let UpdateTopicSQL = `update topics set  title=${title},body='${body}',category_id=${category_id} where id=${id}`;
+                let uptopic = await db.query(UpdateTopicSQL);
+                if (uptopic) {
+                    ctx.session.info = {
+                        success: '话题更新成功',
+                    };
+                    ctx.redirect(`/topics/${topic[0].id}`);
+                }
+            } else {
+                ctx.session.info = {
+                    danger: '没有权限编辑该文档',
+                };
+                ctx.redirect('back');
+            }
+        } else {
+            ctx.session.info = {
+                dange: '不存在该文档'
+            };
+            ctx.redirect('back');
+        }
+    }
+```
+好了  编辑效果已经处理好了。
+#### 删除话题
 
 
