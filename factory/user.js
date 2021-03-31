@@ -35,4 +35,4 @@ for (let index = 0; index < 10; index++) {
        
 }
 let tmp1 = tmp.join("");
-console.log(db(insertSQL + tmp1));
+console.log(db.query(insertSQL + tmp1));

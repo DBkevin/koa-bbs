@@ -8,7 +8,7 @@ class topics {
     getUserSQL = `select id from users`;
     tmp = [];
     getUser() {
-        db(this.getUserSQL).then(data => {
+        db.query(this.getUserSQL).then(data => {
             this.UserList = data.map(obj => {
                 return obj.id;
             })
@@ -45,7 +45,7 @@ class topics {
         this.insert();
     }
     insert() {
-        db(this.insertSQL).then(data => {
+        db.query(this.insertSQL).then(data => {
             console.log(`成功插入${this.topicsCount}条`);
         }).catch(err => {
             console.log(err);
