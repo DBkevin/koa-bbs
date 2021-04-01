@@ -118,7 +118,7 @@ exports = module.exports = {
             let showInfo = await db.query(showInfoSQl);
             showInfo[0].T_created_at = timeago.format(showInfo[0].T_created_at, 'zh_CN');
             const topic = showInfo[0];
-            const repliesSQL=`SELECT r.* ,u.name AS user_name,u.id AS user_id, u.avatar AS user_avatar FROM replies r,users u WHERE  r.user_id=u.id AND r.topic_id=${id}`
+            const repliesSQL = `SELECT r.* ,u.name AS user_name,u.id AS user_id, u.avatar AS user_avatar FROM replies r,users u WHERE  r.user_id=u.id AND r.topic_id=${id} order by r.created_at desc`;
             let replies = await db.query(repliesSQL);
             replies.forEach(item => {
                 item.created_at = timeago.format(item.created_at, 'zh_CN');
