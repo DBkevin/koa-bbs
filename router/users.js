@@ -5,34 +5,55 @@ const fs = require('fs');
 const authorize = require('../middleware/authorize');
 const pagination = require('../middleware/pagination');
 module.exports = {
-    async show(ctx, next) {
+    async show(ctx, next) {//进入方法
         let { user } = ctx.params;
         let queryUserSQL = `select * from users where id=${user}`;
         let queryUser = await db.query(queryUserSQL);
         if (queryUser) {
-        //分页 参数
-        let page = ctx.query.page ? ctx.query.page : 1;
-        let limit = 5;
-        let offset = (page - 1) * limit;
-        //获取总数
-        let Count = await db.query(`select count(id)AS count from topics where user_id=${user}`);
-        //计算累计多少页
-        let pageCount = Math.ceil(Count[0].count / limit);
-        let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user}) order by t.id desc limit ${limit} offset ${offset} `;
-        let topics = await db.query(listSQL);
-        topics.forEach(item=> {
-            item.updated_at = timeago.format(item.updated_at, 'zh_CN');
-        });
-        pageList=pagination(pageCount,`users/${user}`, page),
-        queryUser[0].created_at = timeago.format(queryUser[0].created_at, 'zh_CN');
-            await ctx.render("layouts/index", {
+            let tab = ctx.query.tab ? ctx.query.tab : false;
+            //分页 参数
+            let page = ctx.query.page ? ctx.query.page : 1;//没有就是1
+            let limit = 5;//每页个数
+            let offset = (page - 1) * limit;//偏移量，当前-1*每页个数
+            //获取总数
+            let Count = await db.query(`select count(id)AS count from topics where user_id=${user}`);
+            //计算累计多少页
+            let pageCount = Math.ceil(Count[0].count / limit);//ji算多少页
+            pageList = pagination(pageCount, `users/${user}`, page );//进入分页组件
+            queryUser[0].created_at = timeago.format(queryUser[0].created_at, 'zh_CN');
+            if (!tab) {
+                let listSQL = ` SELECT c.name AS C_name,c.id AS C_id,t.id AS T_id,t.title AS T_title,t.body AS T_body,t.updated_at,t.reply_count FROM topics t,categories c WHERE  t.category_id=c.id AND t.user_id IN (${user}) order by t.id desc limit ${limit} offset ${offset} `;
+                let topics = await db.query(listSQL);
+                topics.forEach(item => {
+                    item.updated_at = timeago.format(item.updated_at, 'zh_CN');
+                });
+                 await ctx.render("layouts/index", {
                 title: queryUser[0].name + '的个人中心',
                 pagename: '../users/show',
                 routerName: 'show',
                 user: queryUser[0],
                 topics: topics,
                 pagination: pageList,
+                tab,
+
             });
+            } else {
+                let listSQL = `SELECT t.id AS T_id,t.title AS T_title, r.* FROM topics t,replies r WHERE r.user_id=1 AND r.topic_id=t.id  ORDER BY r.created_at desc  limit ${limit} offset ${offset} `;
+                let replies= await db.query(listSQL);
+                replies.forEach(item => {
+                    item.created_at= timeago.format(item.created_at, 'zh_CN');
+                });
+                 await ctx.render("layouts/index", {
+                title: queryUser[0].name + '的个人中心',
+                pagename: '../users/show',
+                routerName: 'show',
+                user: queryUser[0],
+                pagination: pageList,
+                tab,
+                replies,
+            });
+            }
+           
         } else {
             ctx.body = "用户不存在！";
         }
@@ -70,7 +91,7 @@ module.exports = {
         if (!authorize(ctx, user)) {
             await ctx.redirect('/');
             return;
-        } 
+        }
         let { introduction } = ctx.req.body;
         if (introduction.length < 10) {
             console.log("进入");
