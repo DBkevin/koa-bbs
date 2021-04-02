@@ -1,13 +1,11 @@
 <ul class="list-unstyled">
     <% replies.forEach(function(reply){ %>
-
     <li class=" media" name="reply<%= reply.id %> "id="repl<%= reply.id %>">
       <div class="media-left">
         <a href="<%= reply.user_id %>">
           <img class="media-object img-thumbnail mr-3" alt="<%= reply.user_name %>" src="/avatar/<%= reply.user_avatar %>" style="width:48px;height:48px;" />
         </a>
       </div>
-
       <div class="media-body">
         <div class="media-heading mt-0 mb-1 text-secondary">
           <a href="<%= reply.user_id %>" title="<%= reply.user_name %>">
@@ -15,13 +13,17 @@
           </a>
           <span class="text-secondary"> • </span>
           <span class="meta text-secondary" title="<%= reply.created_at %>"><%= reply.created_at %></span>
-
-         <%# 回复删除按钮  %>
-          <span class="meta float-right ">
-            <a title="删除回复">
-              <i class="fa fa-trash"></i>
-            </a>
+          <% if(reply.isAuth){ %>
+           <span class="meta float-right">
+            <form action="/repiles/<%= reply.id %>/destroy"
+                onsubmit="return confirm('确定要删除此评论？');"
+                method="post">
+              <button type="submit" class="btn btn-default btn-xs pull-left text-secondary">
+                <i class="fa fa-trash"></i>
+              </button>
+            </form>
           </span>
+          <% }%>
         </div>
         <div class="reply-content text-secondary">
           <%- reply.content %>

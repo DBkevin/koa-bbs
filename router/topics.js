@@ -4,6 +4,7 @@ const pagination = require('../middleware/pagination');
 const authorize = require('../middleware/authorize');
 const xss = require('xss');
 const update = require('../middleware/update');
+const isAuth = require('../middleware/isAuth');
 exports = module.exports = {
     async index(ctx, next) {
         $topicsViewConfig = {
@@ -122,7 +123,10 @@ exports = module.exports = {
             let replies = await db.query(repliesSQL);
             replies.forEach(item => {
                 item.created_at = timeago.format(item.created_at, 'zh_CN');
+                item.isAuth = isAuth(ctx,showInfo[0].T_user_id,item.user_id );
             });
+
+           
             let author = update(ctx, topic.T_user_id);
             const topicsViewConfig = {
                 title: `${showInfo[0].T_title}`,
