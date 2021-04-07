@@ -7,7 +7,6 @@ module.exports = () => {
                 danger: '未登陆无法操作，请先登陆',
             };
             await ctx.redirect("/login");
-
         }
     }
 }
