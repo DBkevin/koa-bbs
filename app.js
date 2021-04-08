@@ -6,6 +6,7 @@ const path = require('path');
 const Router = require('./router/index');
 const static = require('koa-static');
 const views = require('koa-views');
+const isAdmin = require('./middleware/isAdmin');
 app.keys = ['lee'];
 //设置session的key
 app.use(session({
@@ -23,6 +24,7 @@ app.use(views(path.join(__dirname, './views'), {
 }));
 //吧ctx传递给模板
 app.use(async (ctx, next) => {
+    ctx.session.isAdmin = isAdmin();
     ctx.state.ctx = ctx;
     await next();
 });
