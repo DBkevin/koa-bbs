@@ -1,85 +1,62 @@
 const db = require('../core/db');
-const auth = require('../middleware/auth');
-//检查用户角色
+const { getRoleInfo } = require("./getRoleInfo");
+const { getUserInfo } = require("./getUserInfo");
+
 /**
- * 检查权限
+ * 检查用户是否是指定角色
  *
- * @param     {[type]}    name    [name description]
- *
- * @return    {[type]}            [return description]
+ * @param     {type}    name    角色名称，字符串
+ * @param     {int}    user_id    用户ID，数字
+ * @return    {type}            [return description]
  */
-async  function hasRole(name) {
-    if (!isAuth()) {
-        return false;
-    } else {
+async function hasRole(name, user_id = ctx.session.user.id) {
+    let userInfo = await getUserInfo(user_id);
+    if (userInfo) {
         //先根据角色名称来查询权限ID，
-        let name = db.escape(name);
-        let rolesSQL = `select id from roles where name=${name}`;
-        let roles= await db.query(rolesSQL);
-        if (!roles) {
-            return false;
-        } else {
-            let isHshRoleSQL = `select * from model_has_roles where role_id=${roles[0].id} and model_id=${user_id}`;
-            let isHas = await db.query(isHshRoleSQL);
-            if (isHas) {
+        let role = await isRole(name);
+        if (role) {
+            let isHshRoleSQL = `select * from model_has_roles where role_id=${role[0].id} and model_id=${userInfo.id}`;
+            let isHashRole = await db.query(isHshRoleSQL);
+            if (isHashRole) {
                 return true;
             } else {
                 return false;
             }
+        } else {
+            return false;
         }
-        //然后根据权限id来查看是否关联当前用户
+    } else {
+        return false;
     }
-}
 
-function isAuth() {
-    //先获取当前登陆的id
-    let user_id = ctx.session.user.id;
-    if (!user_id) {
-        ctx.session.info = {
-            danger: '请先登陆!',
-        };
-        return false;
-    } else {
-        return true;
-    }
 }
 /**
- * 获取用户信息
+ * 检查指定角色是否存在
  *
- * @param     {[int]}    user_id    用户ID
+ * @param     {string}    role_name    待检查的角色名
  *
- * @return    {(boolean|object)}               返回用户信息或false
+ * @return    {(boolean|object)}       存在该角色就返回该角色id，不存在返回false
  */
- function getUserInfo(user_id) {
-    let userId = db.escape(user_id);
-    let userInfoSQL = `select * from users where id=${userId}`;
-    db.query(userInfoSQL).then(data => {
-        if (data) {
-            return data[0];
-        }
-    })
-    if (!userInfo) {
-        return false;
-    } else {
-        return userInfo[0];
-    }
+async function isRole(role_name) {
+    let roleName = db.cape(role_name);
+    let rolesSQL = `select * from roles where name=${roleName}`;
+    let role = await db.query(rolesSQL);
+    if (role) { return role } else { return false }
 }
 /**
- * 获取角色(role)信息
+ * 检查指定权限是否存在
  *
- * @param     {string}    role_name    要获取的角色(role)名称
+ * @param     {string}   permission_name    待检查的权限名
  *
- * @return    {(boolean|object)}                 返回false或角色详情对象
+ * @return    {(boolean|object)}       存在该权限就返回该权限id，不存在返回false
  */
-async function getRoleInfo(role_name) {
-    let roleName = db.escape(role_name);
-    let roleInfoSQL = `select * from roles where name=${roleName}`;
-    let roleInfo = await db.query(roleInfoSQL);
-    if (roleInfo) {
-        return roleInfo[0];
-    } else {
-        return false;
-    }
+async function isPermission(permission_name) {
+    let permissionName = db.cape(permission_name);
+    let permissionSQL = `select * from  permissions where name=${permissionName}`;
+    let permission = await db.query(permissionSQL);
+    if (permission) { return permission } else { return false }
+
+
 }
 /**
  * 为用户赋予角色
@@ -88,29 +65,94 @@ async function getRoleInfo(role_name) {
  * @param     {int}       user      要赋予的用户ID,默认当前用户 
  * @return    {boolean}          赋予成功返回ture,否则返回false
  */
-async function assignRole(RoleName,user=ctx.session.user.id) {
-    //先确认任务是否真的存在
-    let userInfo = getUserInfo(user);
-    console.log(userInfo);
+async function assignRole(RoleName, user = ctx.session.user.id) {
+    //先确认用户是否真的存在
+    let userInfo = await getUserInfo(user);
     if (userInfo) {
         //确认权限是否存在
-        let roleInfo = getRoleInfo(RoleName);
+        let roleInfo = await getRoleInfo(RoleName);
         console.log(roleInfo);
         if (roleInfo) {
             let SQL = `insert into model_has_roles (role_id,model_type,model_id) values(${roleInfo.id},'user',${userInfo.id})`;
             console.log(SQL);
-            let model_has_roles = await db.query(SQL);
-            if (model_has_roles) {
+            db.query(SQL).then(() => {
                 return true;
-            }
+            }).catch(() => {
+                return false;
+            })
+        } else {
+            false;
+        }
+
+    } else {
+        return false;
+    }
+}
+
+/**
+ * 新建角色
+ *
+ * @param     {string}    role_name    要新建的角色名称
+ *
+ * @return    {boolean}                 返回创建结果，已经存在该角色和新创建成功返回true，否则返回false
+ */
+async function createRole(role_name) {
+    //先查看是否有该角色
+    let role = await isRole(role_name);
+    if (role) {
+        return true;
+    } else {
+        let roleName = db.cape(role_name);
+        let createRoleSQL = `insert into roles (name,guard_name) values(${roleName},'web') `;
+        let createRole = await db.query(createRoleSQL);
+        if (createRole) {
+            return true;
         } else {
             return false;
         }
+    }
+}
+/**
+ * 新建权限
+ *
+ * @param     {string}   permission_name  要新建的权限名称
+ *
+ * @return    {boolean}                 返回创建结果，已经存在该角色和新创建成功返回true，否则返回false
+ */
+async function createPermission(permission_name) {
+    //先查看是否有该角色
+    let permission = await isPermission(permission_name);
+    if (permission) {
+        return true;
     } else {
-        return false;
+        let permissionName = db.cape(permission_name);
+        let createPermissionSQL = `insert into permissions (name,guard_name) values(${permissionName},'web') `;
+        let permission = await db.query(createPermissionSQL);
+        if (permission) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+async function givePermission(role, permission) {
+    let roleInfo = await isRole(role);
+    let permissionInfo = await isPermission(permission);
+    if (roleInfo && permissionInfo) {
+        let giveSQL = `insert into role_has_permissions (permission_id,role_id) values(${permissionInfo[0].id},${roleInfo[0].id})`;
+        let give = await db.query(giveSQL);
+        if (give) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
 exports = module.exports = {
     hasRole,
     assignRole,
+    createRole,
+    createPermission,
+    givePermission
 }

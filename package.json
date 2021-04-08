@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env NODE_ENV=development && node app.js",
     "build": " sass ./src/app.scss ./public/css/app.css",
-    "test2": "node ./factory/topics.js"
+    "test2": "node ./factory/topics.js",
+    "demoBug": "node ./demo/role.js"
   },
   "keywords": [
     "koa2",
