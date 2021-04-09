@@ -7,7 +7,7 @@ const { getUserInfo } = require("./getUserInfo");
  *
  * @param     {type}    name    角色名称，字符串
  * @param     {int}    user_id    用户ID，数字
- * @return    {type}            [return description]
+ * @return    {boolean}           存在权限返回true，否则false
  */
 async function hasRole(name, user_id = ctx.session.user.id) {
     let userInfo = await getUserInfo(user_id);

@@ -2,6 +2,7 @@ const router = require('koa-router')();
 const captchaCode = require('../middleware/captcha');
 const upload = require('../core/upload');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 module.exports = (app) => {
     router.get('/', async (ctx, next) => {
         await ctx.render('layouts/index',
@@ -45,6 +46,7 @@ module.exports = (app) => {
     router.post('/topics/:id/destory', auth(), require('./topics').destory);
     router.post('/repiles/store', auth(), require('./reply').store);
     router.post('/repiles/:id/destroy', auth(), require('./reply').destroy);
+    router.get('/admin',admin(),require('./admin').index);
 
     //上传图片
     router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);

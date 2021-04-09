@@ -1,0 +1,31 @@
+                        <% if(ctx.session.info){ %>
+                            <% if(locals.ctx.session.info.success ){ %>
+                            <div class="flash-message">
+                                <p class="alert alert-success">
+                                    <%= ctx.session.info.success %>
+                                </p>
+                            </div>
+                           <% } %>
+                            <% if(locals.ctx.session.info.info){ %>
+                            <div class="flash-message">
+                                <p class="alert alert-info">
+                                    <%= ctx.session.info.info%>
+                                </p>
+                            </div>
+                           <% } %>
+                           <% if(locals.ctx.session.info.warning){ %>
+                            <div class="flash-message">
+                                <p class="alert alert-warning">
+                                    <%= ctx.session.info.warning %>
+                                </p>
+                            </div>
+                           <% } %>
+                            <% if(locals.ctx.session.info.danger){ %>
+                            <div class="flash-message">
+                                <p class="alert alert-danger">
+                                    <%= ctx.session.info.danger%>
+                                </p>
+                            </div>
+                           <% } %>
+                        <% }%>
+<% ctx.session.info=null %>
