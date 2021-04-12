@@ -1,4 +1,4 @@
-const db = require("../core/db");
+const db = require("../../core/db");
 
 exports=module.exports = {
     async index(ctx, next) {

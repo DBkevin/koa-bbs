@@ -3,7 +3,14 @@ const captchaCode = require('../middleware/captcha');
 const upload = require('../core/upload');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const adminRouter =require('koa-router')();
+adminRouter.prefix('/admin');
 module.exports = (app) => {
+    adminRouter.get('/',admin(),require('./admin/admin').index);
+    adminRouter.get('/get', async (ctx, next) => {
+         ctx.body="123";
+    });
+   
     router.get('/', async (ctx, next) => {
         await ctx.render('layouts/index',
             {
@@ -46,7 +53,7 @@ module.exports = (app) => {
     router.post('/topics/:id/destory', auth(), require('./topics').destory);
     router.post('/repiles/store', auth(), require('./reply').store);
     router.post('/repiles/:id/destroy', auth(), require('./reply').destroy);
-    router.get('/admin',admin(),require('./admin').index);
+  
 
     //上传图片
     router.post('/topics/uploadImage', upload.single('upload_file'), auth(), require('./topics').uploadImages);
@@ -64,4 +71,6 @@ module.exports = (app) => {
     app.use(router.routes());
     //吧所有方法都注入到app里面
     app.use(router.allowedMethods());
+    app.use(adminRouter.routes());
+    app.use(adminRouter.allowedMethods());
 }
