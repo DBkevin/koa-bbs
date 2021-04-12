@@ -7,10 +7,7 @@ const adminRouter =require('koa-router')();
 adminRouter.prefix('/admin');
 module.exports = (app) => {
     adminRouter.get('/',admin(),require('./admin/admin').index);
-    adminRouter.get('/get', async (ctx, next) => {
-         ctx.body="123";
-    });
-   
+    adminRouter.post('/categories', admin(), require('./admin/topics').createCategory);
     router.get('/', async (ctx, next) => {
         await ctx.render('layouts/index',
             {
