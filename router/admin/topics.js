@@ -13,6 +13,17 @@ exports = module.exports = {
             };
             ctx.status = 409;
             ctx.body = JSON.stringify(errors);
+        } else {
+            let insertCategorySQL = `insert into categories(name,description) value(${name},${description});`;
+            let insertCategory = await db.query(insertCategorySQL);
+            if (insertCategory) {
+                ctx.set("Content-Type", "application/json")
+                ctx.status = 200;
+                let msg = {
+                    name: `新增:${name}，成功！`
+                }
+                ctx.body = JSON.stringify(msg);
+            }
         }
     }
 }

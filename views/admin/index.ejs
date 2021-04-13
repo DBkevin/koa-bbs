@@ -61,16 +61,16 @@
                     <form action="/admin/categories" method="post">
                         <div class="form-group">
                             <label for="name-field">分类名</label>
-                            <input class="form-control" type="text" name="name" id="name-field" value="" placeholder="请输入分类名称"  required autofocus>
+                            <input class="form-control" type="text" name="name" id="name-field" value=""
+                                placeholder="请输入分类名称" required autofocus>
                         </div>
                         <div class="form-group">
                             <label for="descript-field">分类描述</label>
-                            <textarea class="form-control " name="description"  id="descript-field" value="" placeholder="请输入分类描述、简介" required ></textarea>
+                            <textarea class="form-control " name="description" id="descript-field" value=""
+                                placeholder="请输入分类描述、简介" required></textarea>
                         </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn formReset btn-danger">重置</button>
-                    <button type="submit" class="btn btn-primary">提交</button>
+                        <button type="button" class="btn formReset btn-danger">重置</button>
+                        <button type="submit" class="btn btn-primary">提交</button>
                 </div>
                 </form>
             </div><!-- /.modal-content -->
@@ -80,34 +80,53 @@
 <script>
     $(document).ready(function () {
         $('#table_id_example').DataTable();
-        $("#createBtn").on('click',function(){
+        $("#createBtn").on('click', function () {
             $("#create").modal('show');
         });
-        $(".formReset").on('click',function(){
-           console.log( $(this));
+        $(".formReset").click(function () {
+            let form = $(this).parent('form')[0];
+            $.each(form, function (index, item) {
+                console.log(item);
+                if ($(item).hasClass('invalid-feedback')) {
+                    $(item).remove();
+                }
+                $(item).removeClass('is-invalid');
+            });
+            form.reset();
         });
-        $("#create form").submit(function(event){
+        $("#create form").submit(function (event) {
             event.preventDefault();
             $.ajax({
-                url:this.action,
-                type:this.method,
-                data:$(this).serialize(),
-                dataType:'json',
-                error:function(req,msg){
-                    openModal('create',req.responseJSON);
+                url: this.action,
+                type: this.method,
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    $('#create').modal('hide');
+                     setSuccessInfo(data);
+                },
+                error: function (req, msg) {
+                    openModal('create', req.responseJSON);
                 }
             });
         })
         //打开mode.并显示错误信息
-      function  openModal(modalName,msg){
-            let modal_name='#'+modalName;
+        function openModal(modalName, msg) {
+            let modal_name = '#' + modalName;
             $(modal_name).modal('show');
             for (const item in msg) {
-               $(modal_name+" form input[name='"+item+"'],textarea[name='"+item+"']").addClass('is-invalid').after(setinvalidInfo(msg[item]));
+                $(modal_name + " form input[name='" + item + "'],textarea[name='" + item + "']").addClass('is-invalid').after(setinvalidInfo(msg[item]));
             }
         }
-        function setinvalidInfo(info){
-            return ' <span class="invalid-feedback" role="alert"><strong>'+info+'</strong></span>'
+        function setinvalidInfo(info) {
+            return ' <span class="invalid-feedback" role="alert"><strong>' + info + '</strong></span>'
+        }
+        function setSuccessInfo(info) {
+            $(".container>.row").before(
+            ' <div class="alert alert-success" role="alert"><strong>'+info+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 3000);
         }
     });
 
