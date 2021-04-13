@@ -25,5 +25,14 @@ exports = module.exports = {
                 ctx.body = JSON.stringify(msg);
             }
         }
+    },
+    async edit(ctx, next) {
+        let { id } = ctx.params;
+         let errors = {
+                name: '类名已经存在',
+                description: '类名已经存在--descript',
+            };
+            ctx.status = 409;
+            ctx.body = JSON.stringify(errors);
     }
 }

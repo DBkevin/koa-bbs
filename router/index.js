@@ -8,6 +8,7 @@ adminRouter.prefix('/admin');
 module.exports = (app) => {
     adminRouter.get('/',admin(),require('./admin/admin').index);
     adminRouter.post('/categories', admin(), require('./admin/topics').createCategory);
+    adminRouter.post('/categories/:id', admin(), require('./admin/topics').edit);
     router.get('/', async (ctx, next) => {
         await ctx.render('layouts/index',
             {
