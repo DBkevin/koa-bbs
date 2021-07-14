@@ -12,7 +12,7 @@ yarn add mysql2 sequelize sequelize-cli
 const path = require('path');
 module.exports = {
 	'env': 'development',
-	'config': path.resolve(__dirname, '/DB/databases.json'),
+	'config': path.resolve(__dirname, '/config/databases.json'),
 	'seeders-path': path.resolve(__dirname, '/DB/seeders'),
 	'migrations-path': path.resolve(__dirname, '/DB/migrations'),
 	'model-path': path.resolve(__dirname,'/Models'),
@@ -20,7 +20,7 @@ module.exports = {
 }
 ```
 以上配置用于设置环境变量(env),数据库配置文件(config),数据库模型文件(models-path),数据种子脚本文件(seeders-path),数据库迁移脚本文件(migrations-paht)和是否开始debug模式(debug);
-- 根据以上配置,创建`/DB/` 以及`/DB/seeders` 等文件夹,并在`/DB/`下新建一个`databases.json`
+- 根据以上配置,创建`/DB/` 以及`/DB/seeders` 等文件夹,并在`/config/`下新建一个`databases.json`
 
 ```json
 {
