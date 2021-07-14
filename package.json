@@ -1,0 +1,22 @@
+{
+  "name": "bbs",
+  "version": "1.0.0",
+  "description": "koa vue ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "migrate": "sequelize db:migrate",
+    "migrate-down": "sequelize db:migrate:undo",
+    "migrate-down-all": "sequelize db:migrate:undo:all",
+    "db-create": "sequelize migration:create --name"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.13.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.5",
+    "sequelize-cli": "^6.2.0"
+  }
+}
