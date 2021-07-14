@@ -52,3 +52,17 @@ module.exports = {
     "migrate-down-all": "sequelize db:migrate:undo:all",
     "db-create": "sequelize migration:create --name"
 ```
+- 执行 `npm run db-create users` 来新建`Users`的`migrate`文件.该命名会在你的`.sequelizerc`文件中设置的`migrations-path`文件夹下面新建一个当前时间+users的文件，编辑该文件既可以
+- 执行 `npm run migrate` 执行并新建表到数据库。
+### Models使用
+- 创建`users`的Model,在`Models`文件下新建`Users.js`
+- 编辑`Models/Users.js`
+### Service
+...
+### Controller
+...
+
+# 安装路由 
+
+
+

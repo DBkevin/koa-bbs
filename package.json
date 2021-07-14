@@ -9,12 +9,14 @@
     "migrate": "sequelize db:migrate",
     "migrate-down": "sequelize db:migrate:undo",
     "migrate-down-all": "sequelize db:migrate:undo:all",
-    "db-create": "sequelize migration:create --name"
+    "db-create": "sequelize migration:create --name",
+    "db:create": "sequelize db:create"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "koa": "^2.13.1",
+    "koa-router": "^10.0.0",
     "mysql2": "^2.2.5",
     "sequelize": "^6.6.5",
     "sequelize-cli": "^6.2.0"

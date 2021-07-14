@@ -1,8 +1,7 @@
 const Koa = require('koa');
 const App = new Koa();
-App.use(async ctx => {
-	ctx.body = "Hello,world";
-});
+const router = require('./Router/index');
+router(App);
 App.listen(3000, () => {
 	console.log('启动chenggong');
 });
