@@ -7,8 +7,15 @@ module.exports = (sequelize, DataTypes) => {
 		email: DataTypes.CHAR,
 		password: DataTypes.CHAR,
 	}, {
+		scopes: {
+			noPass: {
+				attributes: {
+					exclude: ['password']
+				}
+			}
+		},
 		sequelize,
 		modelName: 'User'
-	})
+	});
 	return User;
 }

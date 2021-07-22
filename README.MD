@@ -62,7 +62,16 @@ module.exports = {
 ### Controller
 ...
 
-# 安装路由 
-
-
+# 安装路由,
+yarn add koa-router
+# 配置`user`的`model`以及`service`
+# 填充假数据用于测试
+`npx sequelize seed:generate --name userseed` 生成`user`的填充种子文件,
+# 使用faker来生成假数据
+`yarn add faker`
+# 使用`bcrypt`来加密密码
+`yarn add  bcrypt`
+# 使用`koa-body`来接受传递的文件,表单
+`yarn  add koa-body`
+# 使用`jsonwebtoken`来使用`JWT`记录登陆信息
 
